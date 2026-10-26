@@ -4,3 +4,5 @@ backups/
 .vercel/
 .claude/
 .DS_Store
+.vercel
+.env*
