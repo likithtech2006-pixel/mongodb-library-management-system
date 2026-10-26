@@ -1,5 +1,7 @@
 # MongoDB Library Management System
 
+**Live demo:** https://mongodb-library-management-system.vercel.app
+
 A library management web app built with **MongoDB**, **Node.js/Express** and a plain HTML/CSS/JavaScript frontend. It has a dashboard, dark/light themes, and an "Index lab" that shows MongoDB's query plans live.
 
 ## Requirements covered
@@ -76,6 +78,15 @@ Open http://localhost:3000
 
 ### Configuration
 Copy `.env.example` to `.env` to change the MongoDB URL, database name, port and library rules. It also explains how to turn on real email (any SMTP server, e.g. Gmail with an app password) and SMS (Twilio). Without them, reminders are still recorded in the outbox on the System page.
+
+### Deploying to Vercel
+The app runs on Vercel as a serverless function (`server.js` exports the Express app; `vercel.json` sets the Mumbai region and a daily cron).
+
+1. Allow access from anywhere (`0.0.0.0/0`) in MongoDB Atlas → Network Access, because Vercel's IP addresses change.
+2. In the Vercel project, add the environment variables `MONGO_URI` (your Atlas connection string) and `CRON_SECRET` (any random string).
+3. Deploy with `vercel deploy --prod`, or push to GitHub if the repository is connected.
+
+On Vercel, reminders and reservation-hold expiry run once a day through Vercel Cron (`/api/cron`), and backups are written to temporary storage, so download them straight away from the System page.
 
 ### Enabling transactions
 Transactions need MongoDB to run as a replica set. A single-node replica set is enough:
