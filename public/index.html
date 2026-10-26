@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LibraryDB · MongoDB Library Management</title>
+  <script>
+    // Set the theme before first paint so there is no flash
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem("theme"); } catch (e) {}
+      document.documentElement.dataset.theme =
+        saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-dashboard" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+    <symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8v8M11 8v8M15 8v8M18 8v8"/></symbol>
+    <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><path d="M14 10h5M14 14h3"/></symbol>
+  </defs>
+</svg>
+
+<div class="backdrop" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<div class="app">
+  <aside class="sidebar">
+    <a class="brand" href="#dashboard">
+      <span class="brand-mark"><svg class="icon"><use href="#i-book"/></svg></span>
+      <span class="brand-text"><b>LibraryDB</b><small>MongoDB · Express</small></span>
+    </a>
+
+    <nav class="nav" id="nav">
+      <span class="nav-indicator" id="navIndicator"></span>
+      <a href="#dashboard" data-view="dashboard"><svg class="icon"><use href="#i-dashboard"/></svg><span>Dashboard</span></a>
+      <a href="#books" data-view="books"><svg class="icon"><use href="#i-book"/></svg><span>Books</span></a>
+      <a href="#circulation" data-view="circulation"><svg class="icon"><use href="#i-swap"/></svg><span>Circulation</span><b class="nav-badge" id="overdueBadge" hidden></b></a>
+      <a href="#reservations" data-view="reservations"><svg class="icon"><use href="#i-bookmark"/></svg><span>Reservations</span><b class="nav-badge info" id="readyBadge" hidden></b></a>
+      <a href="#fines" data-view="fines"><svg class="icon"><use href="#i-wallet"/></svg><span>Fines</span></a>
+      <a href="#borrowers" data-view="borrowers"><svg class="icon"><use href="#i-users"/></svg><span>Borrowers</span></a>
+      <a href="#authors" data-view="authors"><svg class="icon"><use href="#i-pen"/></svg><span>Authors</span></a>
+      <a href="#activity" data-view="activity"><svg class="icon"><use href="#i-list"/></svg><span>Activity</span></a>
+      <a href="#system" data-view="system"><svg class="icon"><use href="#i-server"/></svg><span>System</span></a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="db-status" id="dbStatus">
+        <span class="pulse"></span>
+        <span><b id="dbStatusText">Connecting…</b><small id="dbStatusSub">library_management</small></span>
+      </div>
+      <button class="theme-toggle" id="themeToggle" type="button">
+        <span class="theme-icons"><svg class="icon sun"><use href="#i-sun"/></svg><svg class="icon moon"><use href="#i-moon"/></svg></span>
+        <span id="themeLabel">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="title-block">
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSubtitle">Live overview built from MongoDB aggregation pipelines</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" type="button" data-action="add-book"><svg class="icon"><use href="#i-plus"/></svg>Add book</button>
+        <a class="btn btn-primary" href="#circulation"><svg class="icon"><use href="#i-swap"/></svg>Issue book</a>
+      </div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <section class="view" id="view-dashboard" data-title="Dashboard" data-subtitle="Live overview built from MongoDB aggregation pipelines">
+      <div class="stats">
+        <div class="stat" style="--i:0">
+          <div class="stat-icon tone-primary"><svg class="icon"><use href="#i-book"/></svg></div>
+          <div class="stat-body"><span class="stat-label">Book titles</span><strong id="statTitles">0</strong><span class="stat-sub" id="statCopies">—</span></div>
+        </div>
+        <div class="stat" style="--i:1">
+          <svg class="ring" viewBox="0 0 44 44"><circle class="ring-track" cx="22" cy="22" r="18"/><circle class="ring-value" id="availRing" cx="22" cy="22" r="18"/></svg>
+          <div class="stat-body"><span class="stat-label">Copies on shelf</span><strong id="statAvailable">0</strong><span class="stat-sub" id="statAvailablePct">—</span></div>
+        </div>
+        <div class="stat" style="--i:2">
+          <div class="stat-icon tone-info"><svg class="icon"><use href="#i-swap"/></svg></div>
+          <div class="stat-body"><span class="stat-label">Active loans</span><strong id="statActive">0</strong><span class="stat-sub" id="statBorrowers">—</span></div>
+        </div>
+        <div class="stat" style="--i:3">
+          <div class="stat-icon tone-danger"><svg class="icon"><use href="#i-alert"/></svg></div>
+          <div class="stat-body"><span class="stat-label">Overdue</span><strong id="statOverdue">0</strong><span class="stat-sub" id="statOverdueFines">—</span></div>
+        </div>
+        <div class="stat" style="--i:4">
+          <div class="stat-icon tone-success"><svg class="icon"><use href="#i-wallet"/></svg></div>
+          <div class="stat-body"><span class="stat-label">Fines collected</span><strong id="statFines">₹0</strong><span class="stat-sub" id="statFinesSub">—</span></div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <article class="card span-2" style="--i:5">
+          <div class="card-head"><h2>Loans per month</h2><code class="chip">$dateToString · $group</code></div>
+          <div class="bar-chart" id="monthChart"></div>
+        </article>
+        <article class="card" style="--i:6">
+          <div class="card-head"><h2>Popularity</h2><code class="chip">$bucket</code></div>
+          <div class="donut-wrap" id="popularityChart"></div>
+        </article>
+        <article class="card" style="--i:7">
+          <div class="card-head"><h2>Most borrowed</h2><code class="chip">$sort · $limit</code></div>
+          <ol class="rank" id="mostBorrowed"></ol>
+        </article>
+        <article class="card" style="--i:8">
+          <div class="card-head"><h2>Top authors</h2><code class="chip">$group · $sum</code></div>
+          <ol class="rank" id="topAuthors"></ol>
+        </article>
+        <article class="card" style="--i:9">
+          <div class="card-head"><h2>Overdue now</h2><code class="chip">$lookup</code></div>
+          <div class="mini-list" id="overduePreview"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- BOOKS -->
+    <section class="view" id="view-books" data-title="Books" data-subtitle="Browse, search and manage the catalogue" hidden>
+      <div class="toolbar card">
+        <label class="search-field">
+          <svg class="icon"><use href="#i-search"/></svg>
+          <input id="searchBox" type="search" placeholder="Search books…" title="Full-text search across title, author and description" autocomplete="off">
+          <kbd>/</kbd>
+        </label>
+        <div class="segmented" id="statusFilter" role="group" aria-label="Availability">
+          <span class="seg-glider"></span>
+          <button type="button" data-status="" class="active">All</button>
+          <button type="button" data-status="available">Available</button>
+          <button type="button" data-status="out">All out</button>
+        </div>
+        <select id="sortSelect" aria-label="Sort books">
+          <option value="title">Title A–Z</option>
+          <option value="popular">Most borrowed</option>
+          <option value="newest">Newest first</option>
+        </select>
+      </div>
+
+      <div class="card explain" id="explainCard" hidden>
+        <div class="card-head">
+          <h2><svg class="icon"><use href="#i-zap"/></svg>Index lab</h2>
+          <code class="chip">explain("executionStats")</code>
+        </div>
+        <p class="muted">The same search run two ways. The text index jumps straight to matching documents; the regex has to read every document in the collection.</p>
+        <div class="explain-grid" id="explainBody"></div>
+      </div>
+
+      <div class="result-meta" id="resultMeta"></div>
+      <div class="book-grid" id="bookGrid"></div>
+      <nav class="pager" id="pager" aria-label="Pages"></nav>
+    </section>
+
+    <!-- CIRCULATION -->
+    <section class="view" id="view-circulation" data-title="Circulation" data-subtitle="Issue and return books. Each one is a multi-document transaction" hidden>
+      <div class="circ-grid">
+        <article class="card" style="--i:0">
+          <div class="card-head"><h2>Issue a book</h2><code class="chip">transaction</code></div>
+          <form id="issueForm" class="form">
+            <label class="field"><span>Book</span><select id="issueBook" required></select></label>
+            <label class="field"><span>Borrower</span><select id="issueBorrower" required></select></label>
+            <label class="field">
+              <span>Loan period <output id="daysOut">14 days</output></span>
+              <input type="range" id="issueDays" min="1" max="60" value="14">
+            </label>
+            <div class="due-preview"><svg class="icon"><use href="#i-clock"/></svg><span>Due back <b id="duePreview">—</b></span></div>
+            <button class="btn btn-primary btn-block" type="submit"><svg class="icon"><use href="#i-check"/></svg>Issue book</button>
+          </form>
+        </article>
+
+        <article class="card rules" style="--i:1">
+          <div class="card-head"><h2>Library rules</h2><code class="chip">$jsonSchema</code></div>
+          <ul class="rule-list">
+            <li><span class="rule-num" id="ruleMax">3</span><span>books per borrower at once, enforced by an atomic update and the schema's <code>maximum</code></span></li>
+            <li><span class="rule-num" id="ruleFine">₹10</span><span>fine per overdue day, calculated by MongoDB with <code>$$NOW</code> on return</span></li>
+            <li><span class="rule-num" id="ruleTx">ON</span><span>multi-document transactions, so an issue or return never half-completes</span></li>
+          </ul>
+          <div class="overdue-banner" id="overdueBanner" hidden></div>
+        </article>
+      </div>
+
+      <article class="card scan-desk" style="--i:2">
+        <div class="card-head"><h2><svg class="icon"><use href="#i-scan"/></svg>Scan desk</h2><code class="chip">issue or return in two scans</code></div>
+        <form id="scanForm" class="scan-grid" autocomplete="off">
+          <label class="field">
+            <span>1 · Library card <small id="memberPreview" class="scan-preview"></small></span>
+            <input id="scanMember" placeholder="Scan card QR, or type email" required>
+          </label>
+          <label class="field">
+            <span>2 · Book <small id="bookPreview" class="scan-preview"></small></span>
+            <input id="scanBook" placeholder="Scan ISBN barcode or QR label" required>
+          </label>
+          <div class="scan-actions">
+            <button class="btn btn-ghost" type="button" id="cameraBtn"><svg class="icon"><use href="#i-camera"/></svg>Camera</button>
+            <button class="btn btn-primary" type="submit"><svg class="icon"><use href="#i-check"/></svg>Process</button>
+          </div>
+        </form>
+        <div class="camera" id="camera" hidden>
+          <video id="cameraVideo" playsinline muted></video>
+          <span class="camera-frame"></span>
+          <button class="btn btn-ghost btn-sm" type="button" id="cameraStop">Stop camera</button>
+        </div>
+        <p class="muted scan-hint">Works with USB barcode scanners (they type the code and press Enter), the camera in Chrome or Edge, or typing. If the borrower already has the book it is returned, otherwise it is issued.</p>
+      </article>
+
+      <article class="card" style="--i:3">
+        <div class="card-head">
+          <h2>Active loans</h2>
+          <div class="segmented small" id="loanFilter" role="group" aria-label="Loan filter">
+            <span class="seg-glider"></span>
+            <button type="button" data-filter="all" class="active">All</button>
+            <button type="button" data-filter="overdue">Overdue</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Book</th><th>Borrower</th><th>Loan period</th><th>Status</th><th></th></tr></thead>
+            <tbody id="loansBody"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- BORROWERS -->
+    <section class="view" id="view-borrowers" data-title="Borrowers" data-subtitle="Members, their active loans and borrowing history" hidden>
+      <div class="people-layout">
+        <article class="card" style="--i:0">
+          <div class="card-head"><h2>Register borrower</h2><code class="chip">unique index</code></div>
+          <form id="borrowerForm" class="form">
+            <label class="field"><span>Name</span><input id="borrowerName" required maxlength="100" placeholder="e.g. Priya Sharma"></label>
+            <label class="field"><span>Email</span><input id="borrowerEmail" type="email" required placeholder="name@example.com"></label>
+            <label class="field"><span>Phone <small class="muted">optional, for SMS reminders</small></span><input id="borrowerPhone" type="tel" placeholder="+91 98765 43210"></label>
+            <button class="btn btn-primary btn-block" type="submit"><svg class="icon"><use href="#i-plus"/></svg>Register</button>
+          </form>
+        </article>
+        <article class="card" style="--i:1">
+          <div class="card-head">
+            <h2>All borrowers</h2>
+            <label class="search-field compact"><svg class="icon"><use href="#i-search"/></svg><input id="borrowerFilter" type="search" placeholder="Filter…"></label>
+          </div>
+          <div class="people" id="borrowerList"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- RESERVATIONS -->
+    <section class="view" id="view-reservations" data-title="Reservations" data-subtitle="When every copy is out, borrowers join a queue and get the next returned copy" hidden>
+      <div class="circ-grid">
+        <article class="card" style="--i:0">
+          <div class="card-head"><h2>Reserve a book</h2><code class="chip">partial unique index</code></div>
+          <form id="reserveForm" class="form">
+            <label class="field"><span>Book <small class="muted">only books with no copy on the shelf</small></span><select id="reserveBook" required></select></label>
+            <label class="field"><span>Borrower</span><select id="reserveBorrower" required></select></label>
+            <button class="btn btn-primary btn-block" type="submit"><svg class="icon"><use href="#i-bookmark"/></svg>Join the queue</button>
+          </form>
+        </article>
+        <article class="card rules" style="--i:1">
+          <div class="card-head"><h2>How the queue works</h2><code class="chip">$setWindowFields</code></div>
+          <ul class="rule-list">
+            <li><span class="rule-num">1</span><span>A returned copy goes to the <b>first person waiting</b> instead of the shelf</span></li>
+            <li><span class="rule-num" id="ruleHold">3d</span><span>it is held for them, and they get an email / SMS that it's ready</span></li>
+            <li><span class="rule-num">→</span><span>not collected in time? The hold passes to the next person automatically</span></li>
+          </ul>
+        </article>
+      </div>
+      <article class="card" style="--i:2">
+        <div class="card-head">
+          <h2>Queue</h2>
+          <div class="segmented small" id="reservationFilter" role="group" aria-label="Reservation filter">
+            <span class="seg-glider"></span>
+            <button type="button" data-scope="active" class="active">Active</button>
+            <button type="button" data-scope="all">History</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Book</th><th>Borrower</th><th>Reserved</th><th>Status</th><th></th></tr></thead>
+            <tbody id="reservationsBody"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- FINES -->
+    <section class="view" id="view-fines" data-title="Fines" data-subtitle="Every fine is calculated on return and tracked until it is paid" hidden>
+      <div class="stats three">
+        <div class="stat" style="--i:0">
+          <div class="stat-icon tone-danger"><svg class="icon"><use href="#i-alert"/></svg></div>
+          <div class="stat-body"><span class="stat-label">Outstanding</span><strong id="fineOutstanding">₹0</strong><span class="stat-sub" id="fineOutstandingSub">—</span></div>
+        </div>
+        <div class="stat" style="--i:1">
+          <div class="stat-icon tone-success"><svg class="icon"><use href="#i-wallet"/></svg></div>
+          <div class="stat-body"><span class="stat-label">Collected</span><strong id="fineCollected">₹0</strong><span class="stat-sub" id="fineCollectedSub">—</span></div>
+        </div>
+        <div class="stat" style="--i:2">
+          <div class="stat-icon tone-info"><svg class="icon"><use href="#i-clock"/></svg></div>
+          <div class="stat-body"><span class="stat-label">Building on overdue books</span><strong id="fineRunning">₹0</strong><span class="stat-sub">payable once returned</span></div>
+        </div>
+      </div>
+      <article class="card" style="--i:3">
+        <div class="card-head"><h2>Unpaid fines</h2><code class="chip">transaction: loan + payment</code></div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Borrower</th><th>Book</th><th>Returned</th><th>Fine</th><th></th></tr></thead>
+            <tbody id="finesBody"></tbody>
+          </table>
+        </div>
+      </article>
+      <article class="card" style="--i:4">
+        <div class="card-head"><h2>Recent payments</h2><code class="chip">payments collection</code></div>
+        <div class="mini-list" id="paymentsList"></div>
+      </article>
+    </section>
+
+    <!-- ACTIVITY -->
+    <section class="view" id="view-activity" data-title="Activity" data-subtitle="Audit log: who did what, written in the same transaction as the change" hidden>
+      <article class="card" style="--i:0">
+        <div class="card-head">
+          <h2>Audit log</h2>
+          <div class="segmented small" id="activityFilter" role="group" aria-label="Activity filter">
+            <span class="seg-glider"></span>
+            <button type="button" data-entity="" class="active">All</button>
+            <button type="button" data-entity="loan">Loans</button>
+            <button type="button" data-entity="reservation">Reservations</button>
+            <button type="button" data-entity="payment">Payments</button>
+            <button type="button" data-entity="book">Books</button>
+            <button type="button" data-entity="borrower">Borrowers</button>
+            <button type="button" data-entity="system">System</button>
+          </div>
+        </div>
+        <ol class="timeline activity" id="activityList"></ol>
+      </article>
+    </section>
+
+    <!-- SYSTEM -->
+    <section class="view" id="view-system" data-title="System" data-subtitle="Backups, reminders and the activity log" hidden>
+      <div class="circ-grid">
+        <article class="card" style="--i:0">
+          <div class="card-head"><h2>Your name</h2><code class="chip">auditLogs.actor</code></div>
+          <form id="staffForm" class="form">
+            <label class="field"><span>Recorded in the activity log for everything you do on this browser</span><input id="staffName" maxlength="100" placeholder="e.g. Likith"></label>
+            <button class="btn btn-ghost" type="submit">Save name</button>
+          </form>
+        </article>
+        <article class="card" style="--i:1">
+          <div class="card-head"><h2>Reminders</h2><code class="chip">notifications collection</code></div>
+          <div class="channel-row" id="channelStatus"></div>
+          <p class="muted small-text" id="reminderSchedule"></p>
+          <button class="btn btn-primary" type="button" id="runReminders"><svg class="icon"><use href="#i-send"/></svg>Send reminders now</button>
+        </article>
+      </div>
+      <article class="card" style="--i:2">
+        <div class="card-head">
+          <h2>Backups</h2>
+          <button class="btn btn-primary btn-sm" type="button" id="backupNow"><svg class="icon"><use href="#i-download"/></svg>Back up now</button>
+        </div>
+        <p class="muted small-text" id="backupSchedule"></p>
+        <div class="mini-list" id="backupList"></div>
+      </article>
+      <article class="card" style="--i:3">
+        <div class="card-head"><h2>Outbox</h2><code class="chip">email · SMS</code></div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Sent</th><th>To</th><th>Message</th><th>Status</th></tr></thead>
+            <tbody id="outboxBody"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <!-- AUTHORS -->
+    <section class="view" id="view-authors" data-title="Authors" data-subtitle="Referenced by books through authorId, joined with $lookup" hidden>
+      <div class="author-grid" id="authorGrid"></div>
+    </section>
+  </main>
+</div>
+
+<!-- DIALOGS -->
+<dialog class="dialog" id="bookDialog">
+  <form id="bookForm" class="form" method="dialog">
+    <header class="dialog-head">
+      <h2 id="bookDialogTitle">Add book</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Close"><svg class="icon"><use href="#i-x"/></svg></button>
+    </header>
+    <label class="field"><span>Title</span><input id="bookTitle" required maxlength="200"></label>
+    <div class="field-row">
+      <label class="field"><span>Author</span><input id="bookAuthor" required maxlength="100" list="authorOptions"></label>
+      <label class="field"><span>ISBN</span><input id="bookIsbn" required placeholder="978-0-13-235088-4" inputmode="numeric"></label>
+    </div>
+    <label class="field"><span>Copies</span><input id="bookCopies" type="number" min="1" max="1000" value="1" required></label>
+    <label class="field"><span>Description</span><textarea id="bookDescription" maxlength="2000" rows="3"></textarea></label>
+    <footer class="dialog-foot">
+      <button class="btn btn-ghost" type="button" data-close>Cancel</button>
+      <button class="btn btn-primary" type="submit" id="bookSubmit">Save book</button>
+    </footer>
+  </form>
+</dialog>
+<datalist id="authorOptions"></datalist>
+
+<dialog class="dialog" id="borrowerDialog">
+  <form id="borrowerEditForm" class="form" method="dialog">
+    <header class="dialog-head">
+      <h2>Edit borrower</h2>
+      <button class="icon-btn" type="button" data-close aria-label="Close"><svg class="icon"><use href="#i-x"/></svg></button>
+    </header>
+    <label class="field"><span>Name</span><input id="editBorrowerName" required maxlength="100"></label>
+    <label class="field"><span>Email</span><input id="editBorrowerEmail" type="email" required></label>
+    <label class="field"><span>Phone <small class="muted">leave empty to remove</small></span><input id="editBorrowerPhone" type="tel"></label>
+    <footer class="dialog-foot">
+      <button class="btn btn-ghost" type="button" data-close>Cancel</button>
+      <button class="btn btn-primary" type="submit">Save changes</button>
+    </footer>
+  </form>
+</dialog>
+
+<dialog class="dialog wide" id="historyDialog">
+  <header class="dialog-head">
+    <div><h2 id="historyTitle">Loan history</h2><p class="muted" id="historySub"></p></div>
+    <button class="icon-btn" type="button" data-close aria-label="Close"><svg class="icon"><use href="#i-x"/></svg></button>
+  </header>
+  <ol class="timeline" id="historyList"></ol>
+</dialog>
+
+<dialog class="dialog narrow qr-dialog" id="qrDialog">
+  <header class="dialog-head">
+    <h2 id="qrTitle">QR label</h2>
+    <button class="icon-btn" type="button" data-close aria-label="Close"><svg class="icon"><use href="#i-x"/></svg></button>
+  </header>
+  <div class="qr-label" id="qrLabel">
+    <img id="qrImage" alt="QR code" width="200" height="200">
+    <b id="qrName"></b>
+    <small id="qrDetail"></small>
+  </div>
+  <footer class="dialog-foot">
+    <button class="btn btn-ghost" type="button" data-close>Close</button>
+    <button class="btn btn-primary" type="button" id="qrPrint"><svg class="icon"><use href="#i-print"/></svg>Print</button>
+  </footer>
+</dialog>
+
+<dialog class="dialog narrow" id="confirmDialog">
+  <div class="confirm-icon"><svg class="icon"><use href="#i-alert"/></svg></div>
+  <h2 id="confirmTitle">Are you sure?</h2>
+  <p class="muted" id="confirmMessage"></p>
+  <footer class="dialog-foot">
+    <button class="btn btn-ghost" type="button" data-answer="no">Cancel</button>
+    <button class="btn btn-danger" type="button" data-answer="yes" id="confirmYes">Delete</button>
+  </footer>
+</dialog>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
